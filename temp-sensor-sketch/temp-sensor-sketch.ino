@@ -29,8 +29,13 @@
 DHT dht(DHTPIN, DHTTYPE);
 
 // wifi details
+int wifiStatus = WL_IDLE_STATUS;
 const char* ssid     = "some";
 const char* password = "some";
+WiFiClient restClient;
+const char* host="192.168.1.144";
+const int port=8086;
+const char* writeUrl="/write?db=temperatures";
 
 void setup() {
   
@@ -38,16 +43,37 @@ void setup() {
 
   // initialize DHT22
   dht.begin();
-  Serial.println("DHT22 Initialized");  
+  Serial.println("DHT22 Initialized");
 
-  // initialize esp8266 wifi client
+  // Connect to wifi
   WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+}
+
+void wifiConnect() {
+  // initialize esp8266 wifi client
+  while ( wifiStatus != WL_CONNECTED) {
+    Serial.println("Attempting to connect to wifi");
+    wifiStatus = WiFi.begin(ssid, password);
+    // wait for 10 seconds
+    delay (10000);
+  }
+
   Serial.println("WiFi connected");  
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
 }
 
 void loop() {
+
   // Wait a few seconds between measurements.
   delay(2000);
 
@@ -66,9 +92,24 @@ void loop() {
   // Compute heat index in Celsius (isFahreheit = false)
   float hic = dht.computeHeatIndex(t, h, false);
 
-  // send the data to the webserver
+  printDataToSerial(t, h, hic);
   
+  // send the data to the webserver
+  if (restClient.connect(host, port)) {
+    Serial.println("connected.");
 
+    // send the HTTP POST request:
+    restClient.printf("POST %s HTTP/1.1", writeUrl);
+    restClient.println();
+    restClient.printf("Host: %s", host);
+    restClient.println();
+    restClient.println();
+
+    restClient.printf("temp_celsius,room=bedroom_cottage value=%.2f", t);
+    restClient.println();
+  } else {
+    Serial.println("Couldn't connect to the webserver");
+  }
 }
 
 // print the data to serial port
@@ -82,5 +123,6 @@ void printDataToSerial(float t, float h, float hic) {
   Serial.print("Heat index: ");
   Serial.print(hic);
   Serial.print(" *C ");
+  Serial.print("%\n ");
 }
 
