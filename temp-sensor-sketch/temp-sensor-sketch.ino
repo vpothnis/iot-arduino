@@ -99,9 +99,15 @@ void loop() {
     Serial.println("connected.");
 
     // send the HTTP POST request:
-    restClient.print(String("POST ") + writeUrl + " HTTP/1.1\r\n" + "Host: " + host + "\r\n" + "Content-Type: application/octet-stream\r\n" + "Connection: close\r\n\r\n");
+    restClient.print(String("POST ") + writeUrl + " HTTP/1.1\r\n" + "Host: " + host + "\r\n" 
+    + "Content-Type: application/x-www-form-urlencoded\r\n" 
+    + "Content-Length: 43\r\n" 
+    + "Connection: close\r\n\r\n");
 
-    Serial.print(String("POST ") + writeUrl + " HTTP/1.1\r\n" + "Host: " + host + "\r\n" + "Content-Type: application/octet-stream\r\n" + "Connection: close\r\n\r\n");
+    Serial.print(String("POST ") + writeUrl + " HTTP/1.1\r\n" + "Host: " + host + "\r\n" 
+    + "Content-Type: application/x-www-form-urlencoded\r\n" 
+    + "Content-Length: 43\r\n" 
+    + "Connection: close\r\n\r\n");
 
     restClient.print("temp_celsius,room=bedroom_cottage value=");
     restClient.print(t);
