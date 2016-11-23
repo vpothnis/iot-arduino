@@ -105,8 +105,13 @@ void loop() {
     restClient.println();
     restClient.println();
 
-    restClient.printf("temp_celsius,room=bedroom_cottage value=%.2f", t);
+    restClient.print("temp_celsius,room=bedroom_cottage value=");
+    restClient.print(t);
     restClient.println();
+
+    Serial.print("temp_celsius,room=bedroom_cottage value=");
+    Serial.print(t);
+    Serial.println();
   } else {
     Serial.println("Couldn't connect to the webserver");
   }
