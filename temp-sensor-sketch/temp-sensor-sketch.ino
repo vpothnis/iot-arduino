@@ -92,29 +92,27 @@ void loop() {
   // Compute heat index in Celsius (isFahreheit = false)
   float hic = dht.computeHeatIndex(t, h, false);
 
-  printDataToSerial(t, h, hic);
+  //printDataToSerial(t, h, hic);
   
   // send the data to the webserver
   if (restClient.connect(host, port)) {
     Serial.println("connected.");
 
+    // body
+    String body = String("temp_celsius,room=bedroom_cottage value=") + t;
+
+    // request url and headers
+    String postRequest = String("POST ") + writeUrl + " HTTP/1.1\r\n" + "Host: " + host + "\r\n" 
+    + "Content-Type: application/x-www-form-urlencoded\r\n" 
+    + "Content-Length: " + body.length() + "\r\n" 
+    + "Connection: close\r\n\r\n";
+    
     // send the HTTP POST request:
-    restClient.print(String("POST ") + writeUrl + " HTTP/1.1\r\n" + "Host: " + host + "\r\n" 
-    + "Content-Type: application/x-www-form-urlencoded\r\n" 
-    + "Content-Length: 43\r\n" 
-    + "Connection: close\r\n\r\n");
-
-    Serial.print(String("POST ") + writeUrl + " HTTP/1.1\r\n" + "Host: " + host + "\r\n" 
-    + "Content-Type: application/x-www-form-urlencoded\r\n" 
-    + "Content-Length: 43\r\n" 
-    + "Connection: close\r\n\r\n");
-
-    restClient.print("temp_celsius,room=bedroom_cottage value=");
-    restClient.print(t);
+    restClient.print(postRequest);
+    restClient.print(body);
     restClient.println();
 
-    Serial.print("temp_celsius,room=bedroom_cottage value=");
-    Serial.print(t);
+    Serial.print(body);
     Serial.println();
   } else {
     Serial.println("Couldn't connect to the webserver");
